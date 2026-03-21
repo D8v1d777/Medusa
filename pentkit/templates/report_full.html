@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pentest Technical Report - {{ session.name }}</title>
+    <style>
+        body { font-family: sans-serif; }
+        .finding { border-bottom: 1px solid #ccc; padding: 10px; }
+        .HIGH { color: red; }
+        .MEDIUM { color: orange; }
+        .LOW { color: blue; }
+        .CVSS { font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Technical Pentest Report</h1>
+    <p>Engagement: {{ session.name }}</p>
+    <p>Operator: {{ session.operator }}</p>
+    <p>Session ID: {{ session.id }}</p>
+    <p>Date: {{ session.start_time }}</p>
+
+    <h2>Findings</h2>
+    {% for finding in findings %}
+    <div class="finding">
+        <h3 class="{{ finding.severity }}">{{ finding.severity }}: {{ finding.module }}</h3>
+        <p><strong>Target:</strong> {{ finding.target }}</p>
+        <p><strong>CVSS Vector:</strong> <span class="CVSS">{{ finding.cvss_vector }}</span></p>
+        <p><strong>Payload:</strong> {{ finding.payload }}</p>
+        <p><strong>Request:</strong></p>
+        <pre>{{ finding.request }}</pre>
+        <p><strong>Response:</strong></p>
+        <pre>{{ finding.response }}</pre>
+    </div>
+    {% endfor %}
+</body>
+</html>

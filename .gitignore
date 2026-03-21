@@ -1,0 +1,40 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+dist/
+build/
+*.egg
+.pytest_cache/
+.ruff_cache/
+*.db
+*.db-journal
+
+# Node / Electron
+medusa/app/node_modules/
+medusa/app/release/
+medusa/app/dist/
+npm-debug.log*
+
+# IDE / OS
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Logs & local data
+logs/
+*.log
+debug-*.log
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Optional: large local assets (uncomment if needed)
+# *.pdf

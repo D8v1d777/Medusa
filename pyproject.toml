@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pentkit"
+version = "0.1.0"
+description = "Authorized Pentesting Framework"
+readme = "README.md"
+requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "click>=8.1",
+    "httpx[asyncio]>=0.27",
+    "playwright>=1.43",
+    "beautifulsoup4>=4.12",
+    "python-nmap>=0.7",
+    "scapy>=2.5",
+    "impacket>=0.12",
+    "pysnmp>=6.1",
+    "ldap3>=2.9",
+    "pydantic>=2.7",
+    "sqlalchemy>=2.0",
+    "cryptography>=42",
+    "jinja2>=3.1",
+    "weasyprint>=62",
+    "python-json-logger>=2.0",
+    "gophish>=0.1",
+    "pyyaml>=6.0",
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+]
+
+[project.scripts]
+pentkit = "pentkit.cli:main"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

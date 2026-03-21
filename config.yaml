@@ -1,0 +1,21 @@
+engagement:
+  name: "Aditya Degree Colleges Pentest"
+  operator: "AI Pentester"
+  authorized: true
+scope:
+  ips: []
+  domains: ["aditya.ac.in"]
+  cidrs: []
+rates:
+  web: 5.0
+  network: 2.0
+  redteam: 0.5
+ai:
+  provider: "openai"
+  model: "gpt-4o"
+  api_key_env: "OPENAI_API_KEY"
+output:
+  evidence_dir: "./evidence"
+  log_dir: "./logs"
+  report_dir: "./reports"
+database_url: "sqlite:///pentkit_v2.db"

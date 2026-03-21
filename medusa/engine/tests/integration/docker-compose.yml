@@ -1,0 +1,39 @@
+version: '3.8'
+services:
+  dvwa:
+    image: vulnerables/web-dvwa
+    ports: ["4280:80"]
+    networks: [medusa-test]
+  juiceshop:
+    image: bkimminich/juice-shop
+    ports: ["4282:3000"]
+    networks: [medusa-test]
+  webgoat:
+    image: webgoat/webgoat:v2023.4
+    ports: ["4281:8080"]
+    networks: [medusa-test]
+  modsecurity:
+    image: owasp/modsecurity-crs:nginx
+    ports: ["4283:8080"]
+    environment: [BACKEND=http://dvwa:80]
+    networks: [medusa-test]
+  openldap:
+    image: osixia/openldap:1.5.0
+    ports: ["4389:389"]
+    environment:
+      - LDAP_DOMAIN=medusa.test
+      - LDAP_ADMIN_PASSWORD=admin
+    networks: [medusa-test]
+  neo4j:
+    image: neo4j:5.18
+    ports: ["7474:7474", "7687:7687"]
+    environment: [NEO4J_AUTH=neo4j/medusa123]
+    networks: [medusa-test]
+  interactsh:
+    image: projectdiscovery/interactsh-server
+    ports: ["4080:80", "4053:53/udp"]
+    networks: [medusa-test]
+networks:
+  medusa-test:
+    ipam:
+      config: [{subnet: 172.30.0.0/24}]

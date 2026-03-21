@@ -1,0 +1,46 @@
+# =============================================================================
+# Medusa — what you need on a new machine
+# =============================================================================
+#
+# 1) PYTHON (Medusa engine — FastAPI backend)
+#    - Version: Python 3.11 or newer (3.12 recommended)
+#    - Create venv at repo root, then:
+#        pip install -r requirements.txt
+#        pip install -e ./medusa/engine
+#      The second line installs the `medusa` package in editable mode so
+#      `medusa.engine` imports work when PYTHONPATH is the repo root.
+#
+# 2) NODE.JS (Electron + React desktop app under medusa/app/)
+#    - Version: Node.js 18 LTS or newer (20+ recommended)
+#    - Install app dependencies and build:
+#        cd medusa/app
+#        npm install
+#        npm run build
+#        npm start
+#
+# 3) SYSTEM / OPTIONAL
+#    - Git (to clone the repo)
+#    - Windows: Visual Studio Build Tools may be needed for some native Node
+#      modules; Electron usually ships prebuilt binaries.
+#    - Docker: only if you run integration tests (see medusa/engine/tests/integration/)
+#    - AI: set API keys per config (e.g. OPENAI_API_KEY) if using litellm features
+#
+# 4) DEVELOPERS — run tests (optional, not required to run the app)
+#        pip install -r requirements-dev.txt
+#        pytest medusa/engine/tests/
+#
+# =============================================================================
+# Python runtime dependencies (Medusa engine)
+# Keep in sync with medusa/engine/pyproject.toml [project.dependencies]
+# =============================================================================
+
+fastapi>=0.100.0
+uvicorn[standard]>=0.22.0
+httpx>=0.24.0
+beautifulsoup4>=4.12.0
+pydantic>=2.0.0
+sqlalchemy>=2.0.0
+pyyaml>=6.0
+litellm>=1.40.0
+python-json-logger>=2.0.0
+websockets>=12.0

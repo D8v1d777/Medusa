@@ -1,0 +1,11 @@
+communities:
+  - "public"
+  - "private"
+  - "manager"
+  - "admin"
+  - "snmp"
+  - "internal"
+  - "network"
+  - "default"
+  - "1234"
+  - "password"

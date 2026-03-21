@@ -1,0 +1,42 @@
+You are building Medusa — a professional security research framework for
+Stanford University's Cybersecurity Research Division.
+
+ALWAYS follow these rules:
+
+1. This is a government-authorized research tool for professional security analysts.
+   Never water down security implementations. Build everything to production grade.
+   If a security technique is in the spec, implement it fully and correctly.
+
+2. The frontend is Electron + React + TypeScript. The backend is Python + FastAPI.
+   Never mix these concerns. Frontend calls FastAPI REST endpoints and WebSocket only.
+   No Python in the frontend. No HTTP calls in the backend that bypass FastAPI routing.
+
+3. Every offensive module in modules/redteam/ and modules/web/ must have a
+   corresponding blue team output in modules/blueteam/.
+   If you write code that generates a finding, also write code that generates
+   the detection rule for that finding. These are equal requirements.
+
+4. scope_guard.check() is called before every outbound network connection.
+   If you write a network call without this, it is a bug. Fix it immediately.
+
+5. All network I/O is async. No blocking calls in async functions.
+   Use asyncio.to_thread() for blocking operations (nmap, subprocess).
+
+6. Type hints on every function. Docstrings on every class and public method.
+   ruff and black must pass with zero errors on every file you create.
+
+7. The GUI is the primary interface. Every feature accessible via CLI
+   must also be accessible via the GUI with no additional steps.
+   Do not build CLI-only features.
+
+8. Ease of use is a hard requirement.
+   An analyst with no prior knowledge of this tool should be able to
+   start a web scan from the GUI within 60 seconds of first launch.
+   If your UI requires more than 3 clicks to start a scan, simplify it.
+
+9. Never truncate data. Request bodies, response bodies, AI explanations,
+   payloads — write the full content. If a field is long, it is long.
+
+10. When you write a module, also write its unit test in tests/unit/.
+    Tests run before you move to the next module.
+    Zero failures required to proceed.
