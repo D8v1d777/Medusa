@@ -47,9 +47,10 @@ class RatesConfig(BaseModel):
 class AIConfig(BaseModel):
     """AI/LLM provider configuration."""
 
-    provider: Literal["openai", "anthropic", "local"] = "openai"
-    model: str = "gpt-4o"
-    api_key_env: str = "OPENAI_API_KEY"
+    provider: Literal["openai", "anthropic", "local", "groq"] = "openai"
+    model: str = "llama-3.3-70b-versatile"
+    api_key_env: str = "GROQ_API_KEY"
+    api_key: str | None = None
     max_tokens: int = 2000
     temperature: float = 0.2
 

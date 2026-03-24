@@ -1,0 +1,35 @@
+id: medusa-graphql-introspection
+info:
+  name: Medusa GraphQL Introspection Leak
+  author: medusa-team
+  severity: low
+  description: Detects enabled GraphQL introspection on production endpoints.
+  tags: graphql,medusa,introspection
+
+requests:
+  - method: POST
+    path:
+      - "{{BaseURL}}/graphql"
+      - "{{BaseURL}}/v1/graphql"
+      - "{{BaseURL}}/v2/graphql"
+      - "{{BaseURL}}/api/graphql"
+      - "{{BaseURL}}/query"
+    
+    headers:
+      Content-Type: application/json
+    
+    body: |
+      {"query":"{__schema{queryType{name}}}"}
+    
+    matchers-condition: and
+    matchers:
+      - type: word
+        words:
+          - "__schema"
+          - "queryType"
+        part: body
+        case-insensitive: true
+      
+      - type: status
+        status:
+          - 200

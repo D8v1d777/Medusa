@@ -59,6 +59,7 @@ class FindingModel(Base):
     payload = Column(Text, nullable=True)
     request = Column(Text, nullable=True)
     response = Column(Text, nullable=True)
+    exploit_poc = Column(Text, nullable=True)
     screenshot_path = Column(String, nullable=True)
     pcap_path = Column(String, nullable=True)
     ai_explanation = Column(Text, nullable=True)

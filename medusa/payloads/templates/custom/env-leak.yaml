@@ -1,0 +1,35 @@
+id: medusa-env-leak
+info:
+  name: Medusa Environmental Variable Leak Detection
+  author: medusa-team
+  severity: high
+  description: Detects exposed .env files and environment variable leakage on common patterns.
+  tags: medusa,config,exposure,env
+
+requests:
+  - method: GET
+    path:
+      - "{{BaseURL}}/.env"
+      - "{{BaseURL}}/.env.local"
+      - "{{BaseURL}}/.env.dev"
+      - "{{BaseURL}}/.env.prod"
+      - "{{BaseURL}}/.config"
+      - "{{BaseURL}}/.docker-compose.env"
+    
+    stop-at-first-match: true
+    matchers-condition: and
+    matchers:
+      - type: word
+        words:
+          - "DB_PASSWORD"
+          - "AWS_SECRET"
+          - "API_KEY"
+          - "SECRET_KEY"
+          - "STRIPE_KEY"
+          - "JWT_TOKEN"
+        part: body
+        case-insensitive: true
+      
+      - type: status
+        status:
+          - 200
