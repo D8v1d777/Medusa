@@ -1,39 +1,32 @@
-# Medusa — The Hacker's Interface
+# Framework
 
-Version 1.0.0 | Stanford University Cybersecurity Research Division
-**Bypassing the GUI: High-Performance CLI-Driven Exploitation.**
+Integrated security assessment platform. CLI-driven, modular, extensible.
 
-## CLI Quick Start (Linux-Style Tooling)
+## Quick Start
 
-Medusa is now fully operable from the terminal. No Electron required. Optimized for speed, automation, and direct exploitation.
-
-### Running a Scan
 ```bash
-# 1. Activate environment
+# Activate environment
 source .venv/bin/activate  # or .venv\Scripts\activate on Windows
 
-# 2. Run a full web + network scan with exploitative POC generation
-python -m medusa.engine.cli https://target.com -t all -p standard -x --report
+# Full assessment
+python -m medusa.engine.cli scan <target> -t all --report
 
-# 3. Only network scanning with Nmap + CVE correlation
-python -m medusa.engine.cli 192.168.1.0/24 -t network
+# Network enumeration
+python -m medusa.engine.cli scan 192.168.1.0/24 -t network
 
-# 4. Deep web scan with AI triage
-python -m medusa.engine.cli https://api.target.internal -t web -p deep
+# Web assessment with deep policy
+python -m medusa.engine.cli scan https://target.internal -t web -p deep
 ```
 
-### Options
-- `-t, --type` : `web`, `network`, `all` (default: `all`)
-- `-p, --policy` : `quick`, `standard`, `deep`, `api`, `cve`
-- `-x, --exploit` : Enable **Hacker Mode** (generates real `curl` POCs for all findings)
-- `--report` : Generate a professional PDF/JSON report after completion
+## CLI Reference
 
-## Structure
-
-- `medusa/engine/cli.py` — **New CLI Entry Point**
-- `medusa/engine/modules/web/injectors.py` — Exploitative payload generation
-- `medusa/engine/core/` — Core persistent logic and DB models
-- `medusa/app/` — Legacy GUI (deprecated in favor of CLI)
+| Flag | Description |
+|------|-------------|
+| `-t, --type` | `web`, `network`, `ad`, `all` (default: `all`) |
+| `-p, --policy` | `quick`, `standard`, `deep`, `api`, `cve` |
+| `-x, --exploit` | Enable POC generation for findings |
+| `--report` | Generate report after completion |
+| `--no-ai` | Disable AI-assisted triage |
 
 ## Deployment
 
@@ -44,5 +37,4 @@ python -m medusa.engine.cli --help
 ```
 
 ---
-**Restricted Distribution. Authorized engagements only.**
-"We don't just find holes; we provide the keys."
+**Authorized use only.**

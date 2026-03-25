@@ -1,7 +1,0 @@
-# Developer / CI only — install after requirements.txt
-#   pip install -r requirements-dev.txt
-
--r requirements.txt
-
-pytest>=8.0.0
-pytest-asyncio>=0.23.0

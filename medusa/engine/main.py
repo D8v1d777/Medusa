@@ -11,9 +11,9 @@ from medusa.engine.api.routes import sessions, scans, findings, blueteam, report
 from medusa.engine.api.websocket import router as ws_router
 
 app = FastAPI(
-    title="Medusa Engine",
-    version="1.0.0",
-    description="Unified security research framework backend",
+    title="Engine",
+    version="5.0.0",
+    description="Assessment framework backend",
 )
 
 app.add_middleware(

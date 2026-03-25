@@ -57,9 +57,10 @@ class RatesConfig(BaseModel):
 class AIConfig(BaseModel):
     """AI/LLM provider configuration."""
 
-    provider: Literal["openai", "anthropic", "local", "groq"] = "openai"
-    model: str = "llama-3.3-70b-versatile"
-    api_key_env: str = "GROQ_API_KEY"
+    provider: Literal["openai", "anthropic", "local", "unli", "grok"] = "unli"
+    model: str = "dolphin-mixtral-8x7b"
+    base_url: str | None = None
+    api_key_env: str = "UNLI_API_KEY"
     api_key: str | None = None
     leak_lookup_api_key: str | None = None
     max_tokens: int = 2000
