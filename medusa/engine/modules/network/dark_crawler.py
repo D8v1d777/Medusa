@@ -62,7 +62,7 @@ BACKOFF_FACTOR = 4       # backoff multiplier in seconds
 RENEW_CIRCUIT_EVERY = 10 # renew Tor circuit every N pages
 
 # Regex to validate Tor v3 onion URLs (56 base32 chars + .onion)
-ONION_URL_REGEX = re.compile(r'^http[s]?://[a-z2-7]{56}\.onion')
+ONION_URL_REGEX = re.compile(r'http[s]?://[a-z2-7]{56}\.onion')
 
 # Pages to avoid repeatedly scraping (often cause errors, require login, or are pointless)
 BLACKLIST_PATHS = set(['/register.php', '/login.php'])
@@ -230,9 +230,26 @@ def save_results_csv(results, filepath):
         logging.error(f"Failed to save CSV results: {e}")
 
 
+def check_tor_connectivity(session):
+    """Verifies Tor connectivity by querying an 'Am I Tor?' service."""
+    try:
+        resp = session.get('https://check.torproject.org/api/ip', timeout=15)
+        data = resp.json()
+        if data.get('IsTor'):
+            logging.info(f"[*] TOR_TUNNEL_ACTIVE: Routed via exit node {data.get('IP')}")
+            return True
+        else:
+            logging.error("[!] TOR_TUNNEL_INSECURE: Traffic not routed via Tor!")
+            return False
+    except Exception as e:
+        logging.error(f"[!] TOR_TUNNEL_OFFLINE: {e}")
+        return False
+
+
 def load_urls_from_file(filepath):
-    """Load .onion URLs from a text file (one per line). Lines starting with # are ignored."""
+    """Load .onion URLs from a text file (one per line)."""
     urls = []
+    if not filepath: return urls
     path = os.path.abspath(filepath)
     if not os.path.isfile(path):
         return urls
@@ -242,7 +259,7 @@ def load_urls_from_file(filepath):
             if not line or line.startswith('#'):
                 continue
             # Allow lines without scheme
-            if not line.startswith('http://') and not line.startswith('https://'):
+            if not (line.startswith('http://') or line.startswith('https://')):
                 line = 'http://' + line
             urls.append(line)
     return urls
@@ -308,6 +325,12 @@ if __name__ == "__main__":
         logging.info("No URLs from CLI or file; using built-in list.")
 
     session = create_tor_session()
+    
+    # TOR PREREQUISITE CHECK
+    if not check_tor_connectivity(session):
+         print(f"{Colors.RED}[!] EMERGENCY: Darkweb access requires a running Tor instance (port 9050).{Colors.RESET}")
+         sys.exit(1)
+
     os.makedirs(RESULTS_BASE_DIR, exist_ok=True)
 
     for url in onion_start_urls:

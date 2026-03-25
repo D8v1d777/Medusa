@@ -270,7 +270,13 @@ class ActiveScanner:
 
     async def _run_crawler(self, target: str, session: Session) -> Any:
         from medusa.engine.modules.web.crawler import Crawler
-        c = Crawler(self.guard, self.bucket, max_depth=3)
+        proxy = session.cfg.network.tor_proxy if session.cfg.network.use_tor else None
+        c = Crawler(
+            self.guard, self.bucket, 
+            max_depth=3, 
+            proxy=proxy, 
+            user_agent=session.cfg.network.user_agent
+        )
         return await c.run(target, session)
 
     async def _run_template_engine(

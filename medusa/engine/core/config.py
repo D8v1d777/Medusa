@@ -16,7 +16,17 @@ __all__ = [
     "RatesConfig",
     "AIConfig",
     "OutputConfig",
+    "NetworkConfig",
 ]
+
+
+class NetworkConfig(BaseModel):
+    """Network and Proxy configuration."""
+
+    use_tor: bool = False
+    tor_proxy: str = "socks5h://127.0.0.1:9050"
+    tor_control_port: int = 9051
+    user_agent: str = "Medusa-Scanner/1.0 (Cyber-Security-Research)"
 
 
 class EngagementConfig(BaseModel):
@@ -70,6 +80,7 @@ class Config(BaseModel):
     scope: ScopeConfig = Field(default_factory=ScopeConfig)
     rates: RatesConfig = Field(default_factory=RatesConfig)
     ai: AIConfig = Field(default_factory=AIConfig)
+    network: NetworkConfig = Field(default_factory=NetworkConfig)
     output: OutputConfig = Field(default_factory=OutputConfig)
     database_url: str = "sqlite:///medusa.db"
 

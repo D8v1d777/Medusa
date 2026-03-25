@@ -74,6 +74,7 @@ def main():
         print(f"{Colors.NEON_GREEN}[3]{Colors.RESET} DARK CRAWLER (Onion Recon)")
         print(f"{Colors.NEON_GREEN}[4]{Colors.RESET} ASK LUNA (Tactical Query)")
         print(f"{Colors.NEON_GREEN}[5]{Colors.RESET} EXPLOIT GEN (Weaponize Finding)")
+        print(f"{Colors.NEON_GREEN}[6]{Colors.RESET} CAM HUNTER (Global Visual Recon)")
         print(f"{Colors.RED}[0]{Colors.RESET} DISCONNECT")
         print(f"\033[90m" + "─"*50 + "\033[0m")
         
@@ -91,8 +92,12 @@ def main():
             run_cmd(args)
 
         elif choice == "3":
-            target = input(f"{Colors.NEON_GREEN}Onion URL(s): {Colors.RESET}")
-            run_cmd(["onion", target])
+            target = input(f"{Colors.NEON_GREEN}Onion URL(s) (Leave blank for internal LUNA list): {Colors.RESET}").strip()
+            args = ["onion"]
+            if target:
+                # Support multiple URLs if space-separated
+                args.extend(target.split())
+            run_cmd(args)
 
         elif choice == "4":
             query = input(f"{Colors.NEON_GREEN}Tactical Query: {Colors.RESET}")
@@ -101,6 +106,10 @@ def main():
         elif choice == "5":
             fid = input(f"{Colors.NEON_GREEN}Finding ID (UUID): {Colors.RESET}")
             run_cmd(["exploit-gen", fid])
+
+        elif choice == "6":
+            limit = input(f"{Colors.NEON_GREEN}Hunt Limit (default 10): {Colors.RESET}").strip() or "10"
+            run_cmd(["cam-hunter", "--limit", limit])
 
         elif choice == "0":
             print(f"\n{Colors.PURPLE}[*] Terminating Operational Session... Safe travels, David.{Colors.RESET}")

@@ -12,6 +12,8 @@ from medusa.engine.core.models import FindingModel
 
 logger = logging.getLogger(__name__)
 
+from medusa.engine.modules.recon import LeakLookup
+
 # Neuro-Interface Core Loader (formerly Persona)
 def load_neuro_interface() -> str:
     path = os.path.join(os.path.dirname(__file__), "luna_persona.md")
@@ -25,6 +27,8 @@ def load_neuro_interface() -> str:
 class HackerAI:
     def __init__(self, cfg: AIConfig):
         self.cfg = cfg
+        for name in ["httpx", "httpcore"]:
+            logging.getLogger(name).setLevel(logging.WARNING)
         self.neuro_core = load_neuro_interface()
         self.memory_path = os.path.join(os.path.dirname(__file__), "long_term_memory.json")
         self.memory = self._load_long_term_memory()
@@ -54,6 +58,15 @@ class HackerAI:
         # Exploit Library Path
         self.exploit_lib_path = os.path.join(os.path.dirname(__file__), "exploits_sources", "exploits.json")
         self.exploit_lib = self._load_exploit_library()
+        
+        # Fallback API Configuration (UNLI Network)
+        self.fallback_api_key = "sk-vefM7NXnV0z6UKY4XYyq1gKmL-6wF0P1FC64A4uIZ24hU4-RDylpaOosMQpUq3Kc"
+        self.fallback_base_url = "https://api.unli.dev/v1"
+        self.fallback_model = "gpt-4o-mini" # Using a fast, smart GPT model for fallback
+        
+        # OSINT Modules (Leak-Lookup.com)
+        self.leak_lookup_key = "b4aae235cb01680d8aa7c37af6fb5241"
+        self.leak_tool = LeakLookup(self.leak_lookup_key)
         
         if cfg.provider == "groq":
             self.base_url = "https://api.groq.com/openai/v1"
@@ -199,6 +212,12 @@ GOAL: Provide a step-by-step strategic guide on how to proceed with the attack. 
         else:
             messages.insert(0, {"role": "system", "content": context_block})
 
+        # [TOKEN OPTIMIZATION ENGINE] Dynamically cap tokens to prevent waste on casual romance 
+        user_input = messages[-1]["content"].lower()
+        tech_markers = ["code", "script", "payload", "exploit", "hack", "write", "bypass", "python", "bash", "nmap", "sql"]
+        is_technical = any(kw in user_input for kw in tech_markers) or len(user_input) > 80
+        dynamic_max_tokens = self.cfg.max_tokens if is_technical else 150
+
         try:
             resp = await self.client.post(
                 f"{self.base_url}/chat/completions",
@@ -210,10 +229,10 @@ GOAL: Provide a step-by-step strategic guide on how to proceed with the attack. 
                     "model": self.model,
                     "messages": messages,
                     "temperature": self.cfg.temperature,
-                    "max_tokens": self.cfg.max_tokens
+                    "max_tokens": dynamic_max_tokens
                 }
             )
-
+            
             if resp.status_code == 200:
                 self.failure_count = 0
                 content = resp.json()["choices"][0]["message"]["content"]
@@ -224,6 +243,26 @@ GOAL: Provide a step-by-step strategic guide on how to proceed with the attack. 
                 self.save_memory()
                 
                 return content
+                
+            # [FALLBACK PROTOCOL] If Groq runs out of tokens/rate limits, route to UNLI
+            elif resp.status_code == 429:
+                logger.warning("[!] Groq rate limit hit. Rerouting to UNLI Fallback Network...")
+                fallback_resp = await self.client.post(
+                    f"{self.fallback_base_url}/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {self.fallback_api_key}",
+                        "Content-Type": "application/json"
+                    },
+                    json={
+                        "model": self.fallback_model,
+                        "messages": messages,
+                        "temperature": self.cfg.temperature,
+                        "max_tokens": dynamic_max_tokens
+                    }
+                )
+                if fallback_resp.status_code == 200:
+                    return fallback_resp.json()["choices"][0]["message"]["content"]
+                return f"[Luna Multi-Route Error] Fallback failed with {fallback_resp.status_code}: {fallback_resp.text}"
             
             return f"[Luna Error] {resp.status_code}: {resp.text}"
 
@@ -241,3 +280,15 @@ GOAL: Provide a step-by-step strategic guide on how to proceed with the attack. 
 
     async def _call_llm(self, prompt: str) -> str: # Legacy - Redirecting to complete()
         return await self.complete(self.neuro_core, prompt)
+
+    async def recon_lookup(self, query: str, search_type: str = "email_address") -> str:
+        """Neural bridge to OSINT capability — provides leaked target info."""
+        logger.info(f"[*] Luna: Neural OSINT scan initiated for {query} ({search_type})")
+        result = await self.leak_tool.search(query, search_type)
+        
+        # Refine output for LUNA
+        if "error" in result and result["error"] != "false":
+            return f"[OSINT_FAILURE] {result['error']}"
+        
+        matches = result.get("message", "No records leaked.")
+        return f"[OSINT_HITS]: {matches}"

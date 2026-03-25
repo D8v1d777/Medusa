@@ -87,12 +87,16 @@ class Crawler:
         max_depth: int = 3,
         max_pages: int = 500,
         concurrency: int = 10,
+        proxy: str | None = None,
+        user_agent: str = "Medusa-Scanner/1.0",
     ) -> None:
         self.guard = guard
         self.bucket = bucket
         self.max_depth = max_depth
         self.max_pages = max_pages
         self.concurrency = concurrency
+        self.proxy = proxy
+        self.user_agent = user_agent
         self.broadcaster = broadcaster or WSBroadcaster()
         self._visited: set[str] = set()
         self._ignored_ext = {
@@ -140,7 +144,8 @@ class Crawler:
 
         async with httpx.AsyncClient(
             verify=False, timeout=10.0,
-            headers={"User-Agent": "Medusa-Scanner/1.0 (Spider)"},
+            headers={"User-Agent": self.user_agent},
+            proxy=self.proxy,
             follow_redirects=True,
         ) as client:
             while queue and len(self._visited) < self.max_pages:
@@ -242,8 +247,13 @@ class Crawler:
         await self.broadcaster.log(session.id, "INFO", "[crawler] Starting AJAX spider (headless)", "crawler")
 
         async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True)
-            context = await browser.new_context(ignore_https_errors=True)
+            proxy_cfg = {"server": self.proxy} if self.proxy else None
+            browser = await p.chromium.launch(headless=True, proxy=proxy_cfg)
+            context = await browser.new_context(
+                ignore_https_errors=True,
+                user_agent=self.user_agent,
+                proxy=proxy_cfg
+            )
             page = await context.new_page()
 
             # Listen for network requests to catch API calls
@@ -303,7 +313,11 @@ class Crawler:
         parsed = urlparse(target)
         base = f"{parsed.scheme}://{parsed.netloc}"
 
-        async with httpx.AsyncClient(verify=False, timeout=5.0) as client:
+        async with httpx.AsyncClient(
+            verify=False, timeout=5.0,
+            proxy=self.proxy,
+            headers={"User-Agent": self.user_agent}
+        ) as client:
             for spec in common_specs:
                 url = urljoin(base, spec)
                 try:

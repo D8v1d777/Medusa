@@ -7,6 +7,7 @@ import argparse
 import asyncio
 import logging
 import sys
+import os
 from typing import Optional
 from pathlib import Path
 
@@ -27,6 +28,10 @@ logging.basicConfig(
     format="%(message)s",
     handlers=[logging.StreamHandler(sys.stdout)]
 )
+# Aggressive Silencing of HTTP internal loggers
+for logger_name in ["httpx", "httpcore", "urllib3"]:
+    logging.getLogger(logger_name).setLevel(logging.WARNING)
+
 logger = logging.getLogger("medusa-cli")
 
 BANNER = r"""
@@ -155,6 +160,42 @@ async def run_onion(args):
 
     print(f"\n{dc.Colors.NEON_GREEN}Reconnaissance complete! Results saved in {dc.RESULTS_BASE_DIR}/ (one folder per URL).{dc.Colors.RESET}\n")
 
+async def run_cam_hunter(args):
+    """Orchestrates a visual reconnaissance mission across global cam portals."""
+    from medusa.engine.modules.recon.cam_hunter import CamHunter
+    
+    logger.info(rf"""
+    {BANNER}
+    [*] INITIALIZING CAM_HUNTER RECON...
+    """)
+    
+    cfg = Config.load("config_medusa.yaml")
+    proxy = cfg.network.tor_proxy if cfg.network.use_tor else None
+    
+    hunter = CamHunter(proxy=proxy)
+    results = await hunter.hunt(limit=args.limit)
+    
+    # Store results as findings or just log them
+    logger.info(f"[+] Hunt Complete. Discovered {len(results)} active visual targets.")
+    
+    # Create the cam_footage directory if it doesn't exist
+    results_dir = os.path.join("breaches", "cam_footage")
+    os.makedirs(results_dir, exist_ok=True)
+    
+    # Save results to tactical vault
+    import json
+    with open(os.path.join(results_dir, "discovered_cams.json"), "w") as f:
+        json.dump(results, f, indent=4)
+        
+    for res in results:
+        logger.info(f"  - [{res['site']}] {res['name']} ({res['type']})")
+        logger.info(f"    Source: {res['url']}")
+        if 'stream' in res: logger.info(f"    Stream: {res['stream']}")
+        if 'snapshot' in res: logger.info(f"    Snapshot: {res['snapshot']}")
+        
+    logger.info(f"\n[+] Tactical intel committed to: {results_dir}")
+
+
 async def run_ask(args):
     """Invokes the Hacker AI for tactical guidance."""
     print(BANNER)
@@ -224,6 +265,10 @@ def main():
     onion_p.add_argument("-f", "--url-file", help="File with .onion URLs")
     onion_p.add_argument("--password", help="Tor ControlPort password (optional)")
 
+    # CamHunter Command
+    cam_p = subparsers.add_parser("cam-hunter", help="Visual reconnaissance of live global cams")
+    cam_p.add_argument("--limit", type=int, default=10, help="Max results per portal")
+
     args = parser.parse_args()
     
     try:
@@ -238,6 +283,8 @@ def main():
             asyncio.run(LunaChat(user_name="David").start(session_id=args.session))
         elif args.command == "onion":
             asyncio.run(run_onion(args))
+        elif args.command == "cam-hunter":
+            asyncio.run(run_cam_hunter(args))
         else:
             parser.print_help()
     except KeyboardInterrupt:
