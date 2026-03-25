@@ -131,6 +131,16 @@ class Session:
         self.db_session.commit()
         return finding
 
+    @property
+    def findings(self) -> list[FindingModel]:
+        """All findings associated with this session."""
+        return (
+            self.db_session.query(FindingModel)
+            .filter_by(session_id=self.id)
+            .order_by(FindingModel.severity.desc())
+            .all()
+        )
+
     def update_token_usage(self, tokens: int) -> None:
         """Track AI token usage for the session."""
         self.model.ai_token_usage = (self.model.ai_token_usage or 0) + tokens

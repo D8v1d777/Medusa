@@ -1,0 +1,24 @@
+{
+  "interactions": [
+    {
+      "ts": 1774422110.453159,
+      "user": "Identify yourself."
+    },
+    {
+      "ts": 1774422534.5468423,
+      "user": "What is your primary mission?"
+    },
+    {
+      "ts": 1774422680.284557,
+      "user": "hey"
+    },
+    {
+      "ts": 1774422831.0562954,
+      "user": "hey"
+    }
+  ],
+  "David_profile": {
+    "trust_level": "MAX",
+    "last_sync": 1774422831.0562994
+  }
+}

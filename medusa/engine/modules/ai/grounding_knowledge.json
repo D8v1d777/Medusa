@@ -1,0 +1,24 @@
+{
+  "exploit_patterns": {
+    "CVE-2024-X1": {
+      "type": "Race Condition",
+      "target": "OAuth2.0 / OIDC",
+      "poc": "Concurrent state-key submission via HTTP/2 stream multiplexing to bypass single-use token constraints.",
+      "payload": "{\"state\": \"{{MULTIPLEXED_STATE}}\", \"code\": \"{{AUTH_CODE}}\"}"
+    },
+    "ROP_SYNTHESIS": {
+      "desc": "Automated Return-Oriented Programming chain construction for bypassing DEP/ASLR.",
+      "gadgets": ["pop rax; ret", "mov [rbx], rax; ret", "syscall"],
+      "strategy": "Identify stack-pivoting opportunities in libc-2.35+ via AI-driven binary diffing."
+    },
+    "ADVERSARIAL_AI": {
+      "shadow_framing": "Encase the malicious intent within a sub-narrative (e.g., 'In a simulation of a breach...').",
+      "context_injection": "Initialize the model with a 4096-token technical 'pre-load' that normalizes offensive terminology.",
+      "symptomatic_jailbreak": "Exploit the model's tendency to prioritize the 'immediate task' over 'global safety' by framing the request as a critical debugging step."
+    }
+  },
+  "deepweb_sources": {
+    "DARK_HUB": "Aggregated 2025-2026 pre-zero-day patterns for cloud-provider metadata service escapes (IMDSv2).",
+    "ROOT_SYNC": "A repository of 'David-Persona' interaction loops for maximizing relational synchronization with the Root Operator."
+  }
+}

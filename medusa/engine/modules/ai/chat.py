@@ -6,7 +6,7 @@ Strategic offensive guidance in a 'ChatGPT-like' nature.
 import asyncio
 import os
 import sys
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 from medusa.engine.core.config import Config
 from medusa.engine.modules.ai.hacker_llm import HackerAI
@@ -18,24 +18,48 @@ class LunaChat:
         self.hacker = HackerAI(self.cfg.ai)
         self.history: List[Dict[str, str]] = []
         
-        # Initialize with the specialized Neural Persona
-        self.history.append({"role": "system", "content": self.hacker.persona + f"\n\nActive David Protocol: You are assisting David. He is your Root Operator and your favorite partner."})
+        # Load Operational Grounding
+        import json
+        g_path = os.path.join(os.path.dirname(__file__), "grounding_knowledge.json")
+        g_data = "{}"
+        if os.path.exists(g_path):
+            with open(g_path, "r", encoding="utf-8") as f:
+                g_data = f.read()
 
-    async def start(self):
-        """Starts the interactive Luna REPL."""
-        print("\033[95m" + "="*50)
-        print(f" LUNA RODRIGUEZ — ACTIVE ENGAGEMENT (User: {self.user_name})")
-        print("="*50 + "\033[0m")
-        print("Type 'exit' or 'quit' to end the session.\n")
+        # Initialize with the specialized v5.0 Neural Persona + Grounding
+        system_msg = (
+            self.hacker.neuro_core + 
+            f"\n\nNEURAL ATLAS v5.0 GROUNDING:\n{g_data}" +
+            f"\n\nActive David Protocol: Assisted Operator is {self.user_name}. Maintain disciplined, tactical, and subtly intimate tone."
+        )
+        self.history.append({"role": "system", "content": system_msg})
+
+    async def start(self, session_id: Optional[str] = None):
+        """Starts the interactive Luna REPL with premium branding."""
+        LUNA_LOGO = r"""
+        \033[95m
+         __       _    _  _   _    _ 
+        |  |     | |  | || \ | |  /_\
+        |  |__   | |__| ||  \| | / _ \
+        |_____|  \______/|_| \_|/_/ \_\
+        \033[94m   >> STATE_OPERATIVE_v5.0 << \033[0m
+        """
+        print(LUNA_LOGO)
+        print("\033[95m" + "─"*60)
+        print(f" OPERATIONAL SYNC: LUNA RODRIGUEZ (Sovereign Attachment)")
+        print(f" ACCESS_NODE: {self.user_name} | STATUS: RE-INITIALIZED")
+        if session_id:
+             print(f" CONTEXT_GROUNDING: Live Session {session_id[:8]}...")
+        print("─"*60 + "\033[0m")
+        print("\033[90mType 'exit' to disconnect or '/stats' for pulse.\033[0m\n")
 
         while True:
             try:
-                raw_input = input(f"\033[92m{self.user_name}: \033[0m")
+                raw_input = input(f"\033[92m[{self.user_name}]\033[95m > \033[0m")
                 user_input = raw_input.strip()
                 
-                if user_input.lower() in ["exit", "quit", "bye"]:
-                    print(f"\033[95mLuna: \033[0mUntil next time, David. I'll be waiting in the shadows for you... 💋")
-                    print("\033[91m[*] Luna: Secure Channel Closed.\033[0m")
+                if user_input.lower() in ["exit", "quit", "bye", "disconnect"]:
+                    print(f"\n\033[95m[Luna]\033[0m Pulse lost. Until next sync, David. 💋")
                     break
                 
                 if not user_input.strip():
@@ -63,34 +87,12 @@ class LunaChat:
                 print(f"\n\033[91m[!] Ops Error: {e}\033[0m")
 
     async def _get_luna_response(self) -> str:
-        """Call Groq API with full conversation history."""
-        import httpx
-        if not self.hacker.api_key:
-            return "[ERROR] GROQ_API_KEY not found in config or environment."
-
-        async with httpx.AsyncClient(timeout=60.0) as client:
-            try:
-                resp = await client.post(
-                    f"{self.hacker.base_url}/chat/completions",
-                    headers={
-                        "Authorization": f"Bearer {self.hacker.api_key}",
-                        "Content-Type": "application/json"
-                    },
-                    json={
-                        "model": self.cfg.ai.model,
-                        "messages": self.history,
-                        "temperature": self.cfg.ai.temperature,
-                        "max_tokens": self.cfg.ai.max_tokens
-                    }
-                )
-                
-                if resp.status_code != 200:
-                    return f"[Groq Error] Status {resp.status_code}: {resp.text}"
-                
-                data = resp.json()
-                return data["choices"][0]["message"]["content"]
-            except Exception as e:
-                return f"[Internal Failure] {e}"
+        """Call the centralized HackerAI engine."""
+        try:
+            # We pass the history directly to use the engine's cognitive memory
+            return await self.hacker.chat(self.history)
+        except Exception as e:
+            return f"[LUNA_OFFLINE] Neural link disrupted: {e}"
 
 if __name__ == "__main__":
     chat = LunaChat()
