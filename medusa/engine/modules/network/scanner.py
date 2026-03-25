@@ -320,6 +320,12 @@ class NetworkScanner:
             8443: ("HTTPS-Alt", "info", "HTTPS alternative port"),
             9200: ("Elasticsearch", "high", "Elasticsearch exposed — data disclosure risk"),
             27017: ("MongoDB", "high", "MongoDB exposed — may have no auth"),
+            # --- INDUSTRIAL (OT/ICS) INFRASTRUCTURE ---
+            102: ("S7comm", "critical", "Siemens S7 PLC Communication Protocol exposed"),
+            502: ("Modbus", "critical", "Modbus TCP (ICS) - No authentication - Critical industrial risk"),
+            20000: ("DNP3", "critical", "Distributed Network Protocol (DNP3) - SCADA/Grid risk"),
+            47808: ("BACnet", "critical", "Building Automation Control Network (BACnet) - BMS risk"),
+            44818: ("EtherNet/IP", "critical", "Rockwell Automation Common Industrial Protocol"),
         }
 
         for host in profiles:

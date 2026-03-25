@@ -51,9 +51,22 @@ async def run_scan(args):
     
     # Setup core components
     cfg = Config.load("config_medusa.yaml")
+    
+    # Auto-include target in scope
+    scope_ips = args.scope_ips.split(",") if args.scope_ips else []
+    scope_domains = args.scope_domains.split(",") if args.scope_domains else []
+    
+    # Try to determine if target is IP or Domain
+    import ipaddress
+    try:
+        ipaddress.ip_address(args.target)
+        if args.target not in scope_ips: scope_ips.append(args.target)
+    except ValueError:
+        if args.target not in scope_domains: scope_domains.append(args.target)
+
     guard = ScopeGuard(
-        ips=args.scope_ips.split(",") if args.scope_ips else [],
-        domains=args.scope_domains.split(",") if args.scope_domains else [],
+        ips=scope_ips,
+        domains=scope_domains,
         cidrs=args.scope_cidrs.split(",") if args.scope_cidrs else [],
     )
     bucket = TokenBucket(rate=args.rate)
@@ -84,6 +97,12 @@ async def run_scan(args):
             logger.info("[!] EXPLOIT MODE ENABLED: Generating POCs for all findings.")
         
         await web_scanner.run(args.target, args.policy, None, session)
+
+    # 4. Run Sovereign Expert Scanner
+    if args.type in ["all", "web", "network"]:
+        from medusa.engine.modules.redteam.sovereign_scanner import run_sovereign
+        logger.info(f"[*] DEPLOYING SOVEREIGN_EXPERTISE: Analyzing advanced redteam markers...")
+        await run_sovereign(guard, bucket, args.target, session)
 
     # 3. AI Triage & Analysis
     if not args.no_ai:
@@ -226,6 +245,99 @@ async def run_exploit_gen(args):
     print(exploit)
     print("="*40)
 
+async def run_leak_lookup(args):
+    """Searches for compromised data via Leak-Lookup.com."""
+    from medusa.engine.modules.recon.leak_lookup import LeakLookup
+    
+    print(BANNER)
+    cfg = Config.load("config_medusa.yaml")
+    
+    # Priority: Environment variable > Config File
+    api_key = os.environ.get("LEAKLOOKUP_API_KEY") or cfg.ai.leak_lookup_api_key
+    
+    if not api_key:
+        logger.error("[!] Error: LEAKLOOKUP_API_KEY not found in environment or config.")
+        return
+
+    logger.info(f"[*] INITIALIZING LEAK_LOOKUP ({args.type}: {args.query})...")
+    lookup = LeakLookup(api_key=api_key)
+    results = await lookup.search(args.query, args.type)
+    
+    if "error" in results and results["error"] != "false":
+        logger.error(f"[!] Leak-Lookup Error: {results.get('message', results.get('error'))}")
+    else:
+        logger.info(f"[+] Operational Intel Recovered!")
+        print("\n" + "="*60)
+        print(f" LEAK LOOKUP RESULTS: {args.query}")
+        print("="*60)
+        
+        # Results are usually in result.message for successes
+        message = results.get("message", {})
+        if isinstance(message, dict):
+            for leak_name, records in message.items():
+                print(f"\n[!] DATASET: {leak_name}")
+                if isinstance(records, list):
+                    for record in records:
+                        print(f"   - {record}")
+                else:
+                    print(f"   - {records}")
+        else:
+            print(message)
+        print("\n" + "="*60)
+
+async def run_rev_gen(args):
+    """Generates a reverse shell payload."""
+    from medusa.engine.modules.payloads.rev_gen import ReverseShellGenerator
+    
+    print(BANNER)
+    gen = ReverseShellGenerator()
+    
+    if args.list:
+        print("[*] AVAILABLE REVERSE SHELL COMMANDS:")
+        for c in gen.list_commands():
+            print(f"  - {c}")
+        return
+
+    if not args.ip or not args.port or not args.command_name:
+        print("[!] Missing arguments. Usage: medusa rev-gen <ip> <port> <command_name> [-s shell] [-e encode]")
+        return
+
+    payload = gen.generate(args.ip, args.port, args.command_name, args.shell, args.encode)
+    
+    print("\n" + "="*60)
+    print(f" WEAPONIZED REVERSE SHELL: {args.command_name.upper()}")
+    print("="*60)
+    print(payload)
+    print("="*60)
+
+    if args.save:
+        filename = f"rev_{args.command_name}_{args.port}.txt"
+        path = gen.save_to_downloads(payload, filename)
+        print(f"[+] Operational payload committed to: {path}")
+
+async def run_sovereign_scan(args):
+    """Standalone Sovereign Expert Scan."""
+    from medusa.engine.modules.redteam.sovereign_scanner import run_sovereign
+    print(BANNER)
+    logger.info(f"[*] INITIALIZING SOVEREIGN_SCAN for target: {args.target}")
+    
+    cfg = Config.load("config_medusa.yaml")
+    # Auto-include target in scope
+    guard = ScopeGuard(ips=[args.target], domains=[], cidrs=[])
+    bucket = TokenBucket(rate=10)
+    session = Session(cfg=cfg, name=f"SOVEREIGN-{args.target}")
+    
+    await run_sovereign(guard, bucket, args.target, session)
+    
+    print("\n" + "="*60)
+    print(" SOVEREIGN INTELLIGENCE RECOVERED")
+    print("="*60)
+    for f in session.findings:
+        print(f"\n[!] {f.title.upper()}")
+        print(f"    SEVERITY: {f.severity.upper()}")
+        print(f"    DETAILS: \n{f.description}")
+    print("\n" + "="*60)
+
 def main():
     parser = argparse.ArgumentParser(description="Medusa CLI — Advanced Pentesting Tool")
     subparsers = parser.add_subparsers(dest="command")
@@ -269,6 +381,27 @@ def main():
     cam_p = subparsers.add_parser("cam-hunter", help="Visual reconnaissance of live global cams")
     cam_p.add_argument("--limit", type=int, default=10, help="Max results per portal")
 
+    # LeakLookup Command
+    leak_p = subparsers.add_parser("leak-lookup", help="Search for compromised data via Leak-Lookup.com")
+    leak_p.add_argument("query", help="The search query (email, username, etc.)")
+    leak_p.add_argument("-t", "--type", default="email_address", 
+                        choices=["email_address", "username", "ipaddress", "phone", "domain", "password", "fullname"], 
+                        help="The type of data being searched")
+
+    # RevShell Gen Command
+    rev_p = subparsers.add_parser("rev-gen", help="Generate a weaponized reverse shell payload")
+    rev_p.add_argument("ip", nargs="?", help="LHOST IP address")
+    rev_p.add_argument("port", nargs="?", help="LPORT number")
+    rev_p.add_argument("command_name", nargs="?", help="The payload template (e.g., unix_bash)")
+    rev_p.add_argument("-s", "--shell", default="/bin/bash", help="Shell to use (e.g., /bin/sh)")
+    rev_p.add_argument("-e", "--encode", default="none", choices=["none", "url", "base64"], help="Encoding type")
+    rev_p.add_argument("-l", "--list", action="store_true", help="List available payloads")
+    rev_p.add_argument("--save", action="store_true", help="Commit payload to local Downloads folder")
+
+    # Sovereign Scan Command
+    sov_p = subparsers.add_parser("sovereign-scan", help="Run standalone expert-level vulnerability detection")
+    sov_p.add_argument("target", help="Target URL or IP address")
+
     args = parser.parse_args()
     
     try:
@@ -285,6 +418,12 @@ def main():
             asyncio.run(run_onion(args))
         elif args.command == "cam-hunter":
             asyncio.run(run_cam_hunter(args))
+        elif args.command == "leak-lookup":
+            asyncio.run(run_leak_lookup(args))
+        elif args.command == "rev-gen":
+            asyncio.run(run_rev_gen(args))
+        elif args.command == "sovereign-scan":
+            asyncio.run(run_sovereign_scan(args))
         else:
             parser.print_help()
     except KeyboardInterrupt:

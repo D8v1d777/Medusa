@@ -75,6 +75,9 @@ def main():
         print(f"{Colors.NEON_GREEN}[4]{Colors.RESET} ASK LUNA (Tactical Query)")
         print(f"{Colors.NEON_GREEN}[5]{Colors.RESET} EXPLOIT GEN (Weaponize Finding)")
         print(f"{Colors.NEON_GREEN}[6]{Colors.RESET} CAM HUNTER (Global Visual Recon)")
+        print(f"{Colors.NEON_GREEN}[7]{Colors.RESET} LEAK LOOKUP (Credential Exfiltration)")
+        print(f"{Colors.NEON_GREEN}[8]{Colors.RESET} REVERSE SHELL GEN (Payload Factory)")
+        print(f"{Colors.NEON_GREEN}[9]{Colors.RESET} SOVEREIGN SCAN (Expert Detection)")
         print(f"{Colors.RED}[0]{Colors.RESET} DISCONNECT")
         print(f"\033[90m" + "─"*50 + "\033[0m")
         
@@ -110,6 +113,28 @@ def main():
         elif choice == "6":
             limit = input(f"{Colors.NEON_GREEN}Hunt Limit (default 10): {Colors.RESET}").strip() or "10"
             run_cmd(["cam-hunter", "--limit", limit])
+
+        elif choice == "7":
+            query = input(f"{Colors.NEON_GREEN}Search Query (Email/User/IP): {Colors.RESET}")
+            stype = input(f"{Colors.NEON_GREEN}Type (email_address/username/ipaddress/phone/domain): {Colors.RESET}") or "email_address"
+            run_cmd(["leak-lookup", query, "-t", stype])
+
+        elif choice == "8":
+            print(f"{Colors.NEON_GREEN}[*] Available Payloads: {Colors.RESET}")
+            # Quick list call to show options
+            from medusa.engine.modules.payloads.rev_gen import ReverseShellGenerator
+            gen = ReverseShellGenerator()
+            for c in gen.list_commands():
+                print(f"  - {c}")
+            
+            ip = input(f"{Colors.NEON_GREEN}LHOST IP: {Colors.RESET}")
+            port = input(f"{Colors.NEON_GREEN}LPORT: {Colors.RESET}")
+            pname = input(f"{Colors.NEON_GREEN}Payload Name: {Colors.RESET}")
+            run_cmd(["rev-gen", ip, port, pname, "--save"])
+
+        elif choice == "9":
+            target = input(f"{Colors.NEON_GREEN}Sovereign Target: {Colors.RESET}")
+            run_cmd(["sovereign-scan", target])
 
         elif choice == "0":
             print(f"\n{Colors.PURPLE}[*] Terminating Operational Session... Safe travels, David.{Colors.RESET}")
