@@ -9,7 +9,7 @@
 <p align="center">
   <a href="https://commons.wikimedia.org/wiki/Special:FilePath/Malarz_francuski_XIX_wiek_-_Portrait_of_a_woman_with_a_veil_-_M.Ob.1273_MNW_-_National_Museum_in_Warsaw.jpg"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Malarz_francuski_XIX_wiek_-_Portrait_of_a_woman_with_a_veil_-_M.Ob.1273_MNW_-_National_Museum_in_Warsaw.jpg" alt="Portrait of a woman with a veil" width="30%" /></a>
   <a href="https://commons.wikimedia.org/wiki/Special:FilePath/Boldini_-_lady-with-a-black-hat.jpg"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Boldini_-_lady-with-a-black-hat.jpg" alt="Lady in a black hat and veil" width="30%" /></a>
-  <a href="https://wellcomecollection.org/works/v6acqq4g/images?id=v3mdu6kv"><img src="https://wellcomecollection.org/works/v6acqq4g/images?id=v3mdu6kv" alt="Victorian mourning portrait" width="30%" /></a>
+  <a href="https://commons.wikimedia.org/wiki/Special:FilePath/Jacob_Adriaensz_Backer_-_Tronie_of_a_woman_with_a_black_veil,_l19038-b3vt9-1.jpg"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Jacob_Adriaensz_Backer_-_Tronie_of_a_woman_with_a_black_veil,_l19038-b3vt9-1.jpg" alt="A woman in a black veil" width="30%" /></a>
 </p>
 
 ---
